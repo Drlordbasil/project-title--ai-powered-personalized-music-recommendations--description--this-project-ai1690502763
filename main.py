@@ -15,7 +15,7 @@ users_data = pd.read_csv('user_data.csv')
 
 # Step 2: User Profiling
 def build_user_profile(user_id: int) -> dict:
-    user_data = users_data[users_data['user_id'] == user_id]
+    user_data = users_data.loc[users_data['user_id'] == user_id]
     user_profile = user_data[['user_id', 'listening_history',
                               'genre_preferences', 'song_ratings']].to_dict(orient='records')[0]
     return user_profile
@@ -23,8 +23,8 @@ def build_user_profile(user_id: int) -> dict:
 
 # Step 3: Collaborative Filtering
 def collaborative_filtering(user_profile: dict) -> pd.Series:
-    user_ratings_matrix = users_data.pivot(
-        index='user_id', columns='song_id', values='song_ratings').fillna(0)
+    user_ratings_matrix = users_data.pivot_table(
+        index='user_id', columns='song_id', values='song_ratings', fill_value=0)
     similarity_matrix = cosine_similarity(
         user_ratings_matrix, user_ratings_matrix)
     similar_users = similarity_matrix[user_profile['user_id']].argsort()[
